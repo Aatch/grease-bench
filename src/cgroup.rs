@@ -49,6 +49,15 @@ impl Group {
         }
     }
 
+    pub fn set_bool(&self, subsys: &str, file: &str, val: bool) {
+        let val = if val { "1\n" } else { "0\n" };
+
+        let fname = self.get_path(subsys, Some(file));
+
+        let file = io::File::open(fname, "w").unwrap();
+        file.write_str(val);
+    }
+
     pub fn get_int(&self, subsys: &str, value: &str) -> int {
         let fname = self.get_path(subsys, Some(value));
         let mut buf = [0u8,..32];

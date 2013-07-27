@@ -54,6 +54,7 @@ fn start(argc: int, argv: **u8, _cm: *u8) -> int {
     } else {
         io::raw::close(read);
 
+        group.set_bool("memory", "memory.use_hierarchy", true);
         group.add_task(pid);
 
         let mem_usage = group.monitor("memory", "memory.usage_in_bytes");
