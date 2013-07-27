@@ -58,9 +58,8 @@ fn start(argc: int, argv: **u8, _cm: *u8) -> int {
         group.add_task(pid);
 
         let mem_usage = group.monitor("memory", "memory.usage_in_bytes");
-        let max_mem_usage = group.monitor("memory", "memory.max_usage_in_bytes");
 
-        let mut logger = Logger::new("mem.csv", mem_usage, ~[max_mem_usage]);
+        let mut logger = Logger::new("mem.csv", mem_usage, ~[]);
 
         logger.add_comment("Timestamp (ns), memory usage, Max Memory Usage");
 
@@ -125,11 +124,11 @@ impl Logger {
         let tm = sys::getclock();
 
         self.file.write_str(tm.to_str());
-        self.file.write_str(", ");
+        self.file.write_str(",");
         self.file.write_str(self.prev_val.get().to_str());
 
         for self.monitors.iter().advance |m| {
-            self.file.write_str(", ");
+            self.file.write_str(",");
             self.file.write_str(m.get_int().to_str());
         }
 

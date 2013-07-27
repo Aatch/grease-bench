@@ -73,6 +73,14 @@ impl File {
         }
     }
 
+    pub fn write_val<T>(&self, val: &T) -> ErrorResult<int> {
+        use std::sys;
+        unsafe {
+            let buf : &[u8] = cast::transmute((val, sys::size_of::<T>()));
+            self.write_bytes(buf)
+        }
+    }
+
     pub fn read_bytes(&self, out_buf: &mut [u8]) -> ErrorResult<int> {
         unsafe {
             let ret = raw::read(self.fd, out_buf);
@@ -215,7 +223,7 @@ pub mod raw {
     pub fn read(fd: int, buf: &mut [u8]) -> int {
         unsafe {
             let (ptr, len) : (int, int) = cast::transmute(buf);
-            syscall3(n::READ, fd, ptr, len-1)
+            syscall3(n::READ, fd, ptr, len)
         }
     }
 
