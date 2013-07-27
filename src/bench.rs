@@ -26,7 +26,7 @@ fn start(argc: int, argv: **u8, _cm: *u8) -> int {
     let cmd : &str = cmdo;
     let c : &str = "-c";
 
-    let mut group = cgroup::Group::new("bench", ["cpuacct", "memory"]);
+    let mut group = cgroup::Group::new(~"bench", ["cpuacct", "memory"]);
 
     let mut pipes = (0,0);
     let res = sys::pipe(&mut pipes);
@@ -61,7 +61,7 @@ fn start(argc: int, argv: **u8, _cm: *u8) -> int {
 
         let mut logger = Logger::new("mem.csv", mem_usage, ~[]);
 
-        logger.add_comment("Timestamp (ns), memory usage, Max Memory Usage");
+        logger.add_comment("Timestamp (ns), memory usage");
 
         io::raw::write(write, ['0' as u8]);
         io::raw::close(write);
@@ -81,8 +81,6 @@ fn start(argc: int, argv: **u8, _cm: *u8) -> int {
 
             //sys::usleep(5000);
         }
-
-        io::println(group.get_str("cpuacct", "cpuacct.stat"));
     }
 
     0
@@ -92,7 +90,8 @@ pub struct Logger {
     file: io::File,
     primary_mon: cgroup::Monitor,
     monitors: ~[cgroup::Monitor],
-    prev_val: Option<int>
+    prev_val: Option<int>,
+    start_time: u64
 }
 
 impl Logger {
@@ -102,7 +101,8 @@ impl Logger {
             file: io::File::open(log_file, "ws").unwrap(),
             primary_mon: primary_mon,
             monitors: monitors,
-            prev_val: None
+            prev_val: None,
+            start_time: 0
         }
     }
 
@@ -120,8 +120,13 @@ impl Logger {
         }
     }
 
-    priv fn write_log(&self) {
-        let tm = sys::getclock();
+    priv fn write_log(&mut self) {
+        let mut tm = sys::getclock();
+
+        if self.start_time == 0 {
+            self.start_time = tm;
+        }
+        tm -= self.start_time;
 
         self.file.write_str(tm.to_str());
         self.file.write_str(",");

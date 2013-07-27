@@ -17,9 +17,9 @@ struct Monitor {
 
 impl Group {
 
-    pub fn new(name: &str, subsys: &[&str]) -> Group {
+    pub fn new(name: ~str, subsys: &[&str]) -> Group {
         let mut g = Group {
-            name: name.to_owned(),
+            name: name,
             subsys: ~[],
             tasks: ~[]
         };
