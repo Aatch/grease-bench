@@ -19,7 +19,7 @@ fn start(argc: int, argv: **u8, _cm: *u8) -> int {
     };
 
     let args : ~[~str] = unsafe {
-        args.iter().transform(|&p| std::str::raw::from_buf(p)).to_owned_vec()
+        args.iter().map(|&p| std::str::raw::from_c_str(p as *i8)).to_owned_vec()
     };
 
     let cmdo = args.slice_from(1).connect(" ");
@@ -120,7 +120,7 @@ impl Logger {
         }
     }
 
-    priv fn write_log(&mut self) {
+    fn write_log(&mut self) {
         let mut tm = sys::getclock();
 
         if self.start_time == 0 {
@@ -130,9 +130,9 @@ impl Logger {
 
         self.file.write_str(tm.to_str());
         self.file.write_str(",");
-        self.file.write_str(self.prev_val.get().to_str());
+        self.file.write_str(self.prev_val.unwrap().to_str());
 
-        for self.monitors.iter().advance |m| {
+        for m in self.monitors.iter() {
             self.file.write_str(",");
             self.file.write_str(m.get_int().to_str());
         }
