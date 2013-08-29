@@ -208,7 +208,7 @@ pub mod raw {
     pub fn write(fd: int, s: &[u8]) -> int {
         unsafe {
             let (ptr, len) : (int, int) = cast::transmute(s);
-            syscall3(n::WRITE, fd, ptr, len-1)
+            syscall3(n::WRITE, fd, ptr, len)
         }
     }
 
