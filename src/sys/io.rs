@@ -102,7 +102,7 @@ impl File {
 }
 
 impl Drop for File {
-    pub fn drop(&self) {
+    fn drop(&self) {
         if self.fd != 0 {
             raw::close(self.fd);
         }
@@ -110,7 +110,7 @@ impl Drop for File {
 }
 
 impl Clone for File {
-    pub fn clone(&self) -> File {
+    fn clone(&self) -> File {
         let fd = raw::open(self.path, self.flags, DEFAULT_MODE);
         if fd < 0 {
             sys::fail(sys::err::msg(fd*-1))
@@ -208,7 +208,7 @@ pub mod raw {
     pub fn write(fd: int, s: &[u8]) -> int {
         unsafe {
             let (ptr, len) : (int, int) = cast::transmute(s);
-            syscall3(n::WRITE, fd, ptr, len-1)
+            syscall3(n::WRITE, fd, ptr, len)
         }
     }
 
