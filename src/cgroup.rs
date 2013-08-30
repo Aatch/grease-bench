@@ -24,7 +24,7 @@ impl Group {
             tasks: ~[]
         };
 
-        for subsys.iter().advance |&subsys| {
+        for &subsys in subsys.iter() {
             g.subsys.push(subsys.to_owned());
 
             let path = g.get_path(subsys, None);
@@ -41,7 +41,7 @@ impl Group {
 
     pub fn add_task(&mut self, pid: pid_t) {
         self.tasks.push(pid);
-        for self.subsys.iter().advance |sys| {
+        for sys in self.subsys.iter() {
             let fname = self.get_path(*sys, Some("tasks"));
             let file = io::File::open(fname, "a").unwrap();
             file.write_str(pid.to_str());
@@ -94,7 +94,7 @@ impl Group {
         self.subsys.iter().any(|s| s.equiv(&sys))
     }
 
-    priv fn get_path(&self, subsys: &str, file: Option<&str>) -> ~str {
+    fn get_path(&self, subsys: &str, file: Option<&str>) -> ~str {
         if !self.has_subsys(subsys) {
             sys::fail(fmt!("Group does not have subsys %s", subsys));
         }
@@ -113,16 +113,16 @@ impl Group {
 }
 
 impl Drop for Group {
-    pub fn drop(&self) {
+    fn drop(&self) {
 
-        for self.subsys.iter().advance |s| {
+        for s in self.subsys.iter() {
             let fname = CGPATH + *s + "/tasks";
             let file = io::File::open(fname, "w").unwrap();
             file.write_str("0\n");
             file.close();
         }
 
-        for self.subsys.iter().advance |s| {
+        for s in self.subsys.iter() {
             let dirname = self.get_path(*s, None);
             let err = io::rmdir(dirname);
             if err.is_err() {

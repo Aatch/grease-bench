@@ -159,15 +159,15 @@ pub fn setgid(gid: int) {
 pub fn execve(filename: &str, args: &[&str], envs: &[&str]) -> err::Error {
     use std::libc::c_char;
     unsafe {
-        let file : *c_char = filename.as_c_str(|s| s);
+        let file : *c_char = filename.to_c_str().with_ref(|s| s);
         let mut argv = ~[file];
-        for args.iter().transform(|s| s.as_c_str(|r| r)).advance |p| {
+        for p in args.iter().map(|s| s.to_c_str().with_ref(|r| r)) {
             argv.push(p)
         }
 
         argv.push(0 as *c_char);
 
-        let mut envp : ~[*c_char] = envs.iter().transform(|s| s.as_c_str(|r| r)).collect();
+        let mut envp : ~[*c_char] = envs.iter().map(|s| s.to_c_str().with_ref(|r| r)).collect();
         envp.push(0 as *c_char);
 
         let argv_raw : **c_char = &argv[0];
